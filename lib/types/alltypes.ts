@@ -8,3 +8,21 @@ export interface User {
     email : string, 
 
 }
+
+export interface QuizType {
+    id: string;
+    title: string;
+    description: string;
+    forGender: 'female' | 'male';
+    icon: string;
+    questions: number;
+    timeToComplete: string;
+  }
+  
+  export interface TestimonialType {
+    id: string;
+    quote: string;
+    author: string;
+    quizType: string;
+    rating: number;
+  }
