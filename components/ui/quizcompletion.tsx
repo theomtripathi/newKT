@@ -47,7 +47,7 @@ export default function QuizInterface() {
             <div className="space-y-4 mb-8">
               <div className="flex items-center gap-2">
                 <FaCheckCircle className="text-green-600" size={20} />
-                <span>You've answered 18 out of 20 questions</span>
+                <span>You&apos;ve answered 18 out of 20 questions</span>
               </div>
               <div className="flex items-center gap-2">
                 <FaClock className="text-green-600" size={20} />
@@ -55,7 +55,7 @@ export default function QuizInterface() {
               </div>
               <div className="flex items-center gap-2">
                 <FaExclamationCircle className="text-[#F39C12]" size={20} />
-                <span>You haven't answered 2 questions</span>
+                <span>You haven&apos;t answered 2 questions</span>
               </div>
             </div>
 

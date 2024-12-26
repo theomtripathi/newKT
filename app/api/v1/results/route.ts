@@ -7,7 +7,7 @@ interface UserQuiz  {
     userId : string, 
     timestamp : number, 
     quizId : string, 
-    result : any 
+    result: string | number | object; 
 
 }
 
