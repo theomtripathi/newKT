@@ -1,16 +1,13 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Gift } from "lucide-react";
 // import Navbar from "./Navbar";
 import { BsFillBellFill, BsStars } from "react-icons/bs";
 import { HiUsers } from "react-icons/hi";
 import { IoDocumentTextOutline } from "react-icons/io5";
-import { CiCirclePlus } from "react-icons/ci";
 import { HiLightningBolt } from "react-icons/hi";
-import { MdOutlineStarBorderPurple500 } from "react-icons/md";
 import { FiFileText } from "react-icons/fi";
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebase";

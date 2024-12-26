@@ -5,6 +5,8 @@ import { useState,useEffect } from "react";
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { div } from "framer-motion/client";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/firebase";
 
 
 interface Question  {
@@ -656,6 +658,7 @@ export function QuizPage(){
     const [currentQuestion, setCurrentQuestion] = useState(0)
     const [answers, setAnswers] = useState<Record<number, number>>({})
     const [warning, setWarning] = useState(false); 
+    const [userId, setUserId] = useState<string>("")
     
     // const router = useRouter() ; 
 
@@ -732,7 +735,29 @@ export function QuizPage(){
         }))
     }
 
-    const handleSubmit = (newQuestions : newQuestion[])=>{
+    const fetchResults = async(quizData : newQuestion[])=>{
+
+        const response = await fetch("/api/v1/generate-results", {method : "POST", headers : {'Content-Type' : "application/json"}, body : JSON.stringify(quizData)})
+        const data = await response.json(); 
+        const results = data.result ; 
+        return results ; 
+    }
+
+    const writeResults = async(userId : string, quizId : string, results : any)=>{
+        console.log("started the process of writing results")
+        const sendData = {
+            userId, 
+            quizId, 
+            result : results
+        }
+
+        const response = await fetch('/api/v1/results', {method : "POST", headers : {'Content-Type' : "application/json"}, body : JSON.stringify(sendData)})
+        const repData = await response.json()
+        console.log(repData)
+        console.log("Ended the process of writing results")
+    }
+
+    const handleSubmit = async(newQuestions : newQuestion[])=>{
         console.log("The feature is in build. Ideally, you should be navigated")
 
         let flag : boolean = true ; 
@@ -751,6 +776,12 @@ export function QuizPage(){
         if(flag)
         {
             console.log("You will be redirected to the next page")
+            const results = await fetchResults(newQuestions)
+            console.log(results)
+            await writeResults(userId, category, results)
+
+           
+
         }
         else
         {
@@ -761,11 +792,24 @@ export function QuizPage(){
 
     }
 
+    useEffect(()=>{
+        const settingUserId = async()=>{
+            await onAuthStateChanged(auth, (user)=>{
+                if(user)
+                {
+                    setUserId(user.uid)
+                }
+            })
+        }
+
+        settingUserId()
+    })
+
     return(
         <div className="min-h-screen bg-gradient-to-b from-blue-50 via-pink-50 to-white py-20">
-            {/* <div>
+            <div>
                 {JSON.stringify(newQuestions)}
-            </div> */}
+            </div>
             <div className="max-w-3xl mx-auto px-4">
                 <motion.div
                     key={currentQuestion}
