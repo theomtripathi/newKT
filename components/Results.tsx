@@ -14,24 +14,31 @@ export default function Results() {
 
     const fetchResults = async()=>{
 
+
+   
+        try{
+
+            const response = await fetch(`/api/v1/results?userquizId=${userquizId}`, {method : "GET", headers : {'Content-Type' : 'application/json'}})
+            const repData = await response.json()
+            const userQuiz = repData.data ; 
+            // console.log("This is the stateless value of userquiz", userQuiz)
+            // console.log("This is the value of results ", userQuiz.data.result)
+            setResults(userQuiz.data.result)
+            
     
-    try{
+        }
+        catch(error)
+        {
+    
+            console.log("There is an error at fetching /api/results", error)
+    
+        }
 
-        const response = await fetch(`/api/v1/results?userquizId=${userquizId}`, {method : "GET", headers : {'Content-Type' : 'application/json'}})
-        const repData = await response.json()
-        const userQuiz = repData.data ; 
-        // console.log("This is the stateless value of userquiz", userQuiz)
-        // console.log("This is the value of results ", userQuiz.data.result)
-        setResults(userQuiz.data.result)
-        
+   
+  
 
-    }
-    catch(error)
-    {
-
-        console.log("There is an error at fetching /api/results", error)
-
-    }
+    
+    
 }
 
 useEffect(()=>{
@@ -93,7 +100,7 @@ if(isLoading)
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
                     <ul className="list-disc list-inside text-gray-600 space-y-2">
 
-                        {results.quickActions.map((action)=>{
+                        {results.quickActions.map((action : any)=>{
                             return(
                                 <li key={action.text} className="flex gap-2"> <div className="font-semibold italic"> {action.type}</div> <div>{action.text}</div> </li>
                             )

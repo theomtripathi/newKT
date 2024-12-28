@@ -48,6 +48,10 @@ export async function GET(req : NextRequest)
 
         }
 
+        return NextResponse.json({
+            message : "The userquizId doesn't exists"
+        })
+
         
 
 
@@ -56,7 +60,13 @@ export async function GET(req : NextRequest)
     catch(error)
     {
 
+        
+
         console.log("Error at /api/v1/results", error)
+
+        return NextResponse.json({
+            message : "There is some error"
+        })
 
     }
     
@@ -87,6 +97,16 @@ export async function POST(req : NextRequest){
 
         const docRef = await addDoc(collection(db,"userquiz"), docData)
         console.log("document written in userquiz with Id", docRef.id)
+
+        const sendData = {
+            id : docRef.id,
+           
+        }
+
+        return NextResponse.json({
+            message : "The document is written", 
+            data : sendData 
+        })
 
 
 

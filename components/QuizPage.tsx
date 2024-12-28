@@ -770,6 +770,7 @@ export function QuizPage(){
         let flag : boolean = true ; 
 
         const tempQuestions = newQuestions 
+        console.log("These are the tempQuestions ", tempQuestions)
 
         tempQuestions.map((ques)=>{
             if(ques.score === 0)
@@ -787,7 +788,9 @@ export function QuizPage(){
             const results = await fetchResults(newQuestions)
             console.log(results)
             await writeResults(userId, category, results)
-            router.push("/quiz-success")
+            
+            // router.push(`/quiz-success/${}`)
+            router.push('/quiz-success')
 
            
 

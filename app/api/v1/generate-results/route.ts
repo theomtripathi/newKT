@@ -22,25 +22,41 @@ export async function POST(req : NextRequest){
 
   console.log("This is prompt")
 
-  const {object} = await generateObject({
-    model: google("models/gemini-1.5-pro-latest"),
-    prompt: prompt,
-    schema: z.object({
-      KrishnaScore: z.number(),
-      KrishnaScoreDescription: z.string(),
-      issuesIdentified: z.array(z.string().max(100)),
-      quickActions: z.array(
-        z.object({
-          text: z.string(),
-          type: z.enum(["actionable", "reflective", "awareness-building"]),
-        })
-      ),
-    }),
-  });
+  try{
+
+    const {object} = await generateObject({
+      model: google("models/gemini-1.5-pro-latest"),
+      prompt: prompt,
+      schema: z.object({
+        KrishnaScore: z.number(),
+        KrishnaScoreDescription: z.string(),
+        issuesIdentified: z.array(z.string().max(100)),
+        quickActions: z.array(
+          z.object({
+            text: z.string(),
+            type: z.enum(["actionable", "reflective", "awareness-building"]),
+          })
+        ),
+      }),
+    });
 
     return NextResponse.json({
-        result : object 
+      result : object 
+  })
+
+  }
+  catch(error)
+  {
+    console.log("there is an error at /api/vi/generate-results", error)
+
+    return NextResponse.json({
+      message : "There is some error"
     })
+  }
+
+
+
+    
 
     
 
