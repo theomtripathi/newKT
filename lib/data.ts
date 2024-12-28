@@ -9,7 +9,7 @@ export const quizTypes: QuizType[] = [
     forGender: 'female',
     icon: '💑',
     questions: 15,
-    timeToComplete: '8 mins'
+    timeToComplete: '8 mins',
   },
   {
     id: 'where-is-it-going',

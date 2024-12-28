@@ -26,3 +26,11 @@ export interface QuizType {
     quizType: string;
     rating: number;
   }
+
+  export interface UserQuiz  {
+    userId : string, 
+    timestamp : number, 
+    quizId : string, 
+    result : any 
+
+}

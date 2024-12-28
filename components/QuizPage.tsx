@@ -1,13 +1,11 @@
 "use client"
 import { useSearchParams } from "next/navigation";
 import { useState,useEffect } from "react";
-// import { useRouter } from "next/navigation";
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { div } from "framer-motion/client";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/firebase";
-
+import { useRouter } from "next/navigation";
 
 interface Question  {
     id : number, 
@@ -24,7 +22,7 @@ interface newQuestion {
 }
 
 const quizQuestions: Record<string, Question[]> = {
-    "How Deep Is The Friend Zone? ": [
+    "friend-zone-depth": [
         {
             id: 1,
             question: "Does she often call or text you first?",
@@ -176,7 +174,7 @@ const quizQuestions: Record<string, Question[]> = {
             ]
         }
     ],
-    "Do I Have a Chance? ": [
+    "chance-calculator": [
         {
             id: 1,
             question: "Does she discuss her future plans with you?",
@@ -328,7 +326,7 @@ const quizQuestions: Record<string, Question[]> = {
             ]
         }
     ],
-    "Is He The One ": [
+    "is-he-the-one": [
 
         {
             id: 1,
@@ -492,7 +490,7 @@ const quizQuestions: Record<string, Question[]> = {
             ]
         }
     ],
-    "Where Is This Going? ": [
+    "where-is-it-going": [
         {
             id: 1,
             question: "Does he talk about plans for the future with you?",
@@ -649,6 +647,8 @@ const quizQuestions: Record<string, Question[]> = {
 
 export function QuizPage(){
 
+    const router = useRouter()
+
     const searchParams = useSearchParams() ; 
     const category = searchParams.get('category') || ''
     const questions = quizQuestions[category] || []
@@ -737,7 +737,9 @@ export function QuizPage(){
 
     const fetchResults = async(quizData : newQuestion[])=>{
 
-        const response = await fetch("/api/v1/generate-results", {method : "POST", headers : {'Content-Type' : "application/json"}, body : JSON.stringify(quizData)})
+        console.log("This is quiz data in fetch results", quizData)
+
+        const response = await fetch("/api/v1/generate-results", {method : "POST", headers : {'Content-Type' : "application/json"}, body : JSON.stringify({quizData : quizData})})
         const data = await response.json(); 
         const results = data.result ; 
         return results ; 
@@ -776,9 +778,11 @@ export function QuizPage(){
         if(flag)
         {
             console.log("You will be redirected to the next page")
+            console.log("These are the questions which are going into the api ", newQuestions)
             const results = await fetchResults(newQuestions)
             console.log(results)
             await writeResults(userId, category, results)
+            router.push("/quiz-success")
 
            
 
@@ -807,9 +811,9 @@ export function QuizPage(){
 
     return(
         <div className="min-h-screen bg-gradient-to-b from-blue-50 via-pink-50 to-white py-20">
-            <div>
+            {/* <div>
                 {JSON.stringify(newQuestions)}
-            </div>
+            </div> */}
             <div className="max-w-3xl mx-auto px-4">
                 <motion.div
                     key={currentQuestion}

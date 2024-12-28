@@ -1,5 +1,5 @@
 import { db } from "@/firebase";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 import { NextRequest, NextResponse } from "next/server";
 
 
@@ -9,6 +9,58 @@ interface UserQuiz  {
     quizId : string, 
     result : any 
 
+}
+
+// this is a get request which fetches the quiz details from the firestore database 
+export async function GET(req : NextRequest)
+{
+
+    // parameters : it takes the quiz id 
+    // it returns the quiz details 
+
+    const {searchParams} = new URL(req.url) 
+    const userquizId = searchParams.get("userquizId")
+
+    if(!userquizId)
+    {
+        return NextResponse.json({
+            message : "Internal error 500"
+        })
+    }
+
+    try{
+
+        const docRef = doc(db,"userquiz", userquizId)
+        const docSnap = await getDoc(docRef) ; 
+        console.log(docSnap.data())
+
+        if(docSnap.exists())
+        {
+            const sendData = {
+                id : docSnap.id , 
+                data : docSnap.data()
+    
+            }
+
+            return NextResponse.json({
+                data : sendData
+            })
+
+        }
+
+        
+
+
+
+    }
+    catch(error)
+    {
+
+        console.log("Error at /api/v1/results", error)
+
+    }
+    
+    
 }
 
 // this is a post request that writes the quizData into the page 
