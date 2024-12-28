@@ -39,8 +39,8 @@ export default function Navbar() {
                     <Image
                         src="/images/logo.png" // Corrected image path
                         alt="Krishna Test"
-                        width={48} // Specify dimensions
-                        height={48}
+                        width={114} // Specify dimensions
+                        height={114}
                         className="object-contain"
                     />
                 </motion.div>

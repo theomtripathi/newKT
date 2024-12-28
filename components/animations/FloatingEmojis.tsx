@@ -1,3 +1,4 @@
+// FloatingEmojis.tsx
 import React from 'react';
 import { FloatingEmoji } from './FloatingEmoji';
 import { getRandomPosition } from '../../utils/animation';
@@ -5,6 +6,16 @@ import { getRandomPosition } from '../../utils/animation';
 const loveEmojis = ['💖', '💝', '💗', '💓', '⭐️', '✨'];
 
 export function FloatingEmojis() {
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null; // Return null on server-side and initial client render
+  }
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {loveEmojis.map((emoji, index) => (
