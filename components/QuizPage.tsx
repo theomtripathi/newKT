@@ -762,6 +762,8 @@ export function QuizPage(){
         const repData = await response.json()
         console.log(repData)
         console.log("Ended the process of writing results")
+
+        return repData.data.id
     }
 
     const handleSubmit = async(newQuestions : newQuestion[])=>{
@@ -787,10 +789,10 @@ export function QuizPage(){
             console.log("These are the questions which are going into the api ", newQuestions)
             const results = await fetchResults(newQuestions)
             console.log(results)
-            await writeResults(userId, category, results)
+            const id = await writeResults(userId, category, results)
             
             // router.push(`/quiz-success/${}`)
-            router.push('/quiz-success')
+            router.push(`/quiz-success?userquizId=${id}`)
 
            
 
