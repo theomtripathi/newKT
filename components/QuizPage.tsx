@@ -1,8 +1,13 @@
+
+
+
+
 "use client"
 import { useSearchParams } from "next/navigation";
 import { useState,useEffect } from "react";
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+//import { div } from "framer-motion/client";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -745,7 +750,7 @@ export function QuizPage(){
         return results ; 
     }
 
-    const writeResults = async(userId : string, quizId : string, results : any)=>{
+    const writeResults = async(userId : string, quizId : string, results : string)=>{
         console.log("started the process of writing results")
         const sendData = {
             userId, 
