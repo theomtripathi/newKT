@@ -10,8 +10,10 @@ export function Footer() {
           {/* Logo and Description */}
           <div className="flex flex-col items-center">
             <Image
-              src=""
+              src="/images/logo.png"
               alt="Krishna Test"
+              width={70} // Specify dimensions
+              height={70}
               className="h-14 brightness-0 invert mb-4"
             />
             <p className="text-blue-200 max-w-xs">
