@@ -1,6 +1,25 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+
 export default function QuizSuccess() {
+    const searchParams = useSearchParams() 
+    const router = useRouter()
+    const userquizId = searchParams.get('userquizId') ; 
+
+    const handleResults = ()=>{
+
+        if(userquizId)
+        {
+            router.push(`/results?userquizId=${userquizId}`)
+        }
+        else
+        {
+            console.log("Attention : Please pass a valid userquizId in params ")
+        }
+
+    }
     return (
         <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-blue-50 via-pink-50 to-white">
 
@@ -14,7 +33,7 @@ export default function QuizSuccess() {
                         </h2>
                         <button className=" px-6  py-3 text-lg font-semibold text-white bg-white/20 backdrop-blur-lg border border-pink-300 rounded-lg shadow-md hover:bg-white/30 hover:border-pink-500 focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all duration-300 ">
                             <span className="inset-0 opacity-50 bg-gradient-to-r from-pink-400 via-transparent to-gray-400 blur-md rounded-lg"></span>
-                            <span className="">See the results of your quiz</span>
+                            <span className="" onClick={handleResults}>See the results of your quiz</span>
                         </button>
 
                     </div>
