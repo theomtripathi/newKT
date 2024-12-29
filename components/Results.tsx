@@ -1,6 +1,8 @@
 "use client"
 import { useSearchParams } from "next/navigation";
-
+import { PDFReport } from "./PDFReport";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { Download } from "lucide-react";
 // import {UserQuiz} from "@/lib/types/alltypes"
 import { useState, useEffect } from "react";
 
@@ -112,13 +114,18 @@ if(isLoading)
             </div>
 
             <div className="flex justify-center my-3">
+
+                <PDFDownloadLink document={<PDFReport results={results}/>} fileName="results.pdf">
                 <button
                     
-                    className="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold rounded-lg shadow-md hover:from-pink-600 hover:to-purple-600 transition duration-300 transform hover:scale-105"
+                    className="flex gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold rounded-lg shadow-md hover:from-pink-600 hover:to-purple-600 transition duration-300 transform hover:scale-105"
                 >
-                    Download Results PDF
+                    <Download className="w-5 h-5 mr-2" /> Download Results PDF
                 </button>
+                </PDFDownloadLink>
             </div>
+
+            
         </div>
     );
 }
