@@ -5,12 +5,14 @@
 "use client"
 import { useSearchParams } from "next/navigation";
 import { useState,useEffect } from "react";
+// import { useRouter } from "next/navigation";
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 //import { div } from "framer-motion/client";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/firebase";
-import { useRouter } from "next/navigation";
+import { Suspense } from "react";
+
 
 interface Question  {
     id : number, 
@@ -27,7 +29,7 @@ interface newQuestion {
 }
 
 const quizQuestions: Record<string, Question[]> = {
-    "friend-zone-depth": [
+    "How Deep Is The Friend Zone? ": [
         {
             id: 1,
             question: "Does she often call or text you first?",
@@ -179,7 +181,7 @@ const quizQuestions: Record<string, Question[]> = {
             ]
         }
     ],
-    "chance-calculator": [
+    "Do I Have a Chance? ": [
         {
             id: 1,
             question: "Does she discuss her future plans with you?",
@@ -331,7 +333,7 @@ const quizQuestions: Record<string, Question[]> = {
             ]
         }
     ],
-    "is-he-the-one": [
+    "Is He The One ": [
 
         {
             id: 1,
@@ -495,7 +497,7 @@ const quizQuestions: Record<string, Question[]> = {
             ]
         }
     ],
-    "where-is-it-going": [
+    "Where Is This Going? ": [
         {
             id: 1,
             question: "Does he talk about plans for the future with you?",
@@ -650,180 +652,149 @@ const quizQuestions: Record<string, Question[]> = {
 };
 
 
-export function QuizPage(){
-
-    const router = useRouter()
-
-    const searchParams = useSearchParams() ; 
-    const category = searchParams.get('category') || ''
-    const questions = quizQuestions[category] || []
-    // console.log("This the specific category questions", questions)
-
-
-    const [currentQuestion, setCurrentQuestion] = useState(0)
-    const [answers, setAnswers] = useState<Record<number, number>>({})
-    const [warning, setWarning] = useState(false); 
-    const [userId, setUserId] = useState<string>("")
-    
-    // const router = useRouter() ; 
-
-    const copyQuiz = (questions :  Question[])=>{
-        
-
-        const  newQuestions : newQuestion[] = []
-
-        questions.map((ques)=>{
-            const newQues = {
-                id : ques.id ,
-                question : ques.question,
-                answer : "default",
-                score : 0
-            }
-
-            newQuestions.push(newQues)
-        })
-
-        return newQuestions
-
-
-       
-
-    }
-
-    const initialQuestions = copyQuiz(questions) ; 
-
-    const [newQuestions, setNewQuestions] = useState<newQuestion[]>(initialQuestions)
-    
-
-    
-
-
-    const handleNext = ()=>{
-        if(currentQuestion < questions.length - 1)
-        {
-            setCurrentQuestion(currentQuestion + 1)
-        }
-
-    }
-
-    const handlePrevious = ()=>{
-        if(currentQuestion > 0)
-        {
-            setCurrentQuestion(currentQuestion - 1)
-        }
-    }
-
-
-    const handleOptionUpdate = (option : string, question : Question, optionIndex : number)=>{
-
-        const tempQuestions = newQuestions ; 
-
-        tempQuestions.map((ques)=>{
-            
-            if(ques.id === question.id)
-            {
-                ques.answer = option 
-                ques.score = 4 - optionIndex
-                
-            }
-        })
-
-        setNewQuestions(tempQuestions)
-        
-        
-    }
-
-    const handleAnswer = (optionIndex : number) => { 
-        setAnswers(prev => ({
-            ...prev, 
-            [currentQuestion] : optionIndex 
-        }))
-    }
-
-    const fetchResults = async(quizData : newQuestion[])=>{
-
-        console.log("This is quiz data in fetch results", quizData)
-
-        const response = await fetch("/api/v1/generate-results", {method : "POST", headers : {'Content-Type' : "application/json"}, body : JSON.stringify({quizData : quizData})})
-        const data = await response.json(); 
-        const results = data.result ; 
-        return results ; 
-    }
-
-    const writeResults = async(userId : string, quizId : string, results : string)=>{
-        console.log("started the process of writing results")
-        const sendData = {
-            userId, 
-            quizId, 
-            result : results
-        }
-
-        const response = await fetch('/api/v1/results', {method : "POST", headers : {'Content-Type' : "application/json"}, body : JSON.stringify(sendData)})
-        const repData = await response.json()
-        console.log(repData)
-        console.log("Ended the process of writing results")
-
-        return repData.data.id
-    }
-
-    const handleSubmit = async(newQuestions : newQuestion[])=>{
-        console.log("The feature is in build. Ideally, you should be navigated")
-
-        let flag : boolean = true ; 
-
-        const tempQuestions = newQuestions 
-        console.log("These are the tempQuestions ", tempQuestions)
-
-        tempQuestions.map((ques)=>{
-            if(ques.score === 0)
-            {
-                flag = false 
-                
-
-            }
-        })
-
-        if(flag)
-        {
-            console.log("You will be redirected to the next page")
-            console.log("These are the questions which are going into the api ", newQuestions)
-            const results = await fetchResults(newQuestions)
-            console.log(results)
-            const id = await writeResults(userId, category, results)
-            
-            // router.push(`/quiz-success/${}`)
-            router.push(`/quiz-success?userquizId=${id}`)
-
-           
-
-        }
-        else
-        {
-            console.log("You will be not redirected to the next page ")
-            setWarning(true)
-        }
-
-
-    }
-
-    useEffect(()=>{
-        const settingUserId = async()=>{
-            await onAuthStateChanged(auth, (user)=>{
-                if(user)
-                {
-                    setUserId(user.uid)
-                }
-            })
-        }
-
-        settingUserId()
-    })
-
-    return(
+function LoadingState() {
+    return (
         <div className="min-h-screen bg-gradient-to-b from-blue-50 via-pink-50 to-white py-20">
-            {/* <div>
-                {JSON.stringify(newQuestions)}
-            </div> */}
+            <div className="max-w-3xl mx-auto px-4">
+                <div className="bg-white rounded-2xl p-8 shadow-xl">
+                    <div className="animate-pulse space-y-4">
+                        <div className="h-2 bg-blue-200 rounded"></div>
+                        <div className="h-6 bg-blue-100 w-3/4 rounded"></div>
+                        <div className="space-y-3">
+                            {[1, 2, 3, 4].map((i) => (
+                                <div key={i} className="h-12 bg-blue-50 rounded"></div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default function QuizPage() {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) {
+        return <LoadingState />;
+    }
+
+    return (
+        <Suspense fallback={<LoadingState />}>
+            <QuizContent />
+        </Suspense>
+    );
+}
+
+function QuizContent() {
+    const searchParams = useSearchParams();
+    const category = searchParams.get('category') || '';
+    const questions = quizQuestions[category] || [];
+
+    const [currentQuestion, setCurrentQuestion] = useState(0);
+    const [answers, setAnswers] = useState<Record<number, number>>({});
+    const [warning, setWarning] = useState(false);
+    const [userId, setUserId] = useState<string>("");
+    const [newQuestions, setNewQuestions] = useState<newQuestion[]>(() =>
+        questions.map(ques => ({
+            id: ques.id,
+            question: ques.question,
+            answer: "default",
+            score: 0
+        }))
+    );
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setUserId(user.uid);
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    const handleNext = () => {
+        if (currentQuestion < questions.length - 1) {
+            setCurrentQuestion(prev => prev + 1);
+            setWarning(false);
+        }
+    };
+
+    const handlePrevious = () => {
+        if (currentQuestion > 0) {
+            setCurrentQuestion(prev => prev - 1);
+            setWarning(false);
+        }
+    };
+
+    const handleOptionUpdate = (option: string, question: Question, optionIndex: number) => {
+        setNewQuestions(prev => prev.map(ques =>
+            ques.id === question.id
+                ? { ...ques, answer: option, score: 4 - optionIndex }
+                : ques
+        ));
+    };
+
+    const handleAnswer = (optionIndex: number) => {
+        setAnswers(prev => ({
+            ...prev,
+            [currentQuestion]: optionIndex
+        }));
+    };
+
+    const fetchResults = async (quizData: newQuestion[]) => {
+        try {
+            const response = await fetch("/api/v1/generate-results", {
+                method: "POST",
+                headers: { 'Content-Type': "application/json" },
+                body: JSON.stringify(quizData)
+            });
+            const data = await response.json();
+            return data.result;
+        } catch (error) {
+            console.error("Error fetching results:", error);
+            throw error;
+        }
+    };
+
+    const writeResults = async (userId: string, quizId: string, results: string) => {
+        try {
+            const response = await fetch('/api/v1/results', {
+                method: "POST",
+                headers: { 'Content-Type': "application/json" },
+                body: JSON.stringify({ userId, quizId, result: results })
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("Error writing results:", error);
+            throw error;
+        }
+    };
+
+    const handleSubmit = async () => {
+        const hasAllAnswers = newQuestions.every(ques => ques.score !== 0);
+
+        if (!hasAllAnswers) {
+            setWarning(true);
+            return;
+        }
+
+        try {
+            const results = await fetchResults(newQuestions);
+            await writeResults(userId, category, results);
+            // Add navigation logic here
+        } catch (error) {
+            console.error("Error submitting quiz:", error);
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-gradient-to-b from-blue-50 via-pink-50 to-white py-20">
             <div className="max-w-3xl mx-auto px-4">
                 <motion.div
                     key={currentQuestion}
@@ -832,7 +803,6 @@ export function QuizPage(){
                     exit={{ opacity: 0, x: -20 }}
                     className="bg-white rounded-2xl p-8 shadow-xl"
                 >
-                    {/* Progress Bar */}
                     <div className="mb-8">
                         <div className="h-2 bg-blue-100 rounded-full">
                             <div
@@ -845,41 +815,46 @@ export function QuizPage(){
                         </p>
                     </div>
 
-                    { warning && <div className="text-red-600 text-center italic font-semibold text-base"> Please answer all the questions to submit </div>}
+                    {warning && (
+                        <div className="text-red-600 text-center italic font-semibold text-base mb-4">
+                            Please answer all questions to submit
+                        </div>
+                    )}
 
-                    {/* Question */}
                     <h2 className="text-2xl font-bold text-blue-900 mb-8 text-center">
                         {questions[currentQuestion]?.question}
                     </h2>
 
-                    {/* Options */}
                     <div className="space-y-4 mb-8">
                         {questions[currentQuestion]?.options.map((option, index) => (
                             <motion.button
                                 key={index}
-                                className={`w-full p-4 rounded-xl text-left transition-all ${answers[currentQuestion] === index
-                                    ? 'bg-blue-900 text-white'
-                                    : 'bg-blue-50 text-blue-900 hover:bg-blue-100'
-                                    }`}
+                                className={`w-full p-4 rounded-xl text-left transition-all ${
+                                    answers[currentQuestion] === index
+                                        ? 'bg-blue-900 text-white'
+                                        : 'bg-blue-50 text-blue-900 hover:bg-blue-100'
+                                }`}
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
-                                onClick={() => { handleOptionUpdate(option, questions[currentQuestion], index) ;  handleAnswer(index)}}
+                                onClick={() => {
+                                    handleOptionUpdate(option, questions[currentQuestion], index);
+                                    handleAnswer(index);
+                                }}
                             >
                                 {option}
                             </motion.button>
                         ))}
                     </div>
 
-                    {/* Navigation Buttons */}
                     <div className="flex justify-between">
                         <button
                             onClick={handlePrevious}
                             disabled={currentQuestion === 0}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all
-                    ${currentQuestion === 0
+                            className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all ${
+                                currentQuestion === 0
                                     ? 'bg-gray-100 text-gray-400'
                                     : 'bg-blue-100 text-blue-900 hover:bg-blue-200'
-                                }`}
+                            }`}
                         >
                             <ArrowLeft size={20} />
                             Previous
@@ -887,7 +862,7 @@ export function QuizPage(){
 
                         {currentQuestion === questions.length - 1 ? (
                             <button
-                                onClick={()=>{handleSubmit(newQuestions)}}
+                                onClick={handleSubmit}
                                 className="flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-900 text-white hover:bg-blue-800 transition-all"
                             >
                                 Submit
@@ -905,5 +880,5 @@ export function QuizPage(){
                 </motion.div>
             </div>
         </div>
-    )
+    );
 }

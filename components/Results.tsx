@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useSearchParams } from "next/navigation";
 import { PDFReport } from "./PDFReport";
 import { PDFDownloadLink } from "@react-pdf/renderer";
@@ -87,31 +87,32 @@ if(isLoading)
                 </div>
             </div>
 
-            {/* Issues and Quick Actions Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="border border-gray-300 bg-white rounded-lg p-4 shadow-md">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Issues Identified</h3>
-                    <ul className="list-disc list-inside text-gray-600 space-y-2">
-                    {results.issuesIdentified.map((issue : string)=>{
-                            return(<li key={issue}> {issue}</li>)
-                        })}
-                       
-                    </ul>
-                </div>
-                <div className="border border-gray-300 bg-white rounded-lg p-4 shadow-md">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
-                    <ul className="list-disc list-inside text-gray-600 space-y-2">
-
-                        {results.quickActions.map((action : any)=>{
-                            return(
-                                <li key={action.text} className="flex gap-2"> <div className="font-semibold italic"> {action.type}</div> <div>{action.text}</div> </li>
-                            )
-                        })}
-
-                        
-                    </ul>
-                </div>
-            </div>
+      {/* Issues and Quick Actions Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="border border-gray-300 bg-white rounded-lg p-4 shadow-md">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            Issues Identified
+          </h3>
+          <ul className="list-disc list-inside text-gray-600 space-y-2">
+            {results?.issuesIdentified.map((issue) => (
+              <li key={issue}>{issue}</li>
+            ))}
+          </ul>
+        </div>
+        <div className="border border-gray-300 bg-white rounded-lg p-4 shadow-md">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            Quick Actions
+          </h3>
+          <ul className="list-disc list-inside text-gray-600 space-y-2">
+            {results?.quickActions.map((action) => (
+              <li key={action.text} className="flex gap-2">
+                <div className="font-semibold italic">{action.type}</div>
+                <div>{action.text}</div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
 
             <div className="flex justify-center my-3">
 
@@ -128,4 +129,18 @@ if(isLoading)
             
         </div>
     );
+}
+
+export default function Results() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResultsWithSearchParams />
+    </Suspense>
+  );
+}
+
+function ResultsWithSearchParams() {
+  const searchParams = useSearchParams();
+  const userquizId = searchParams.get("userquizId");
+  return <ResultsContent userquizId={userquizId} />;
 }
