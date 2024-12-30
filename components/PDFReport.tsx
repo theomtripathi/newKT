@@ -40,13 +40,17 @@ const styles = StyleSheet.create({
   },
 });
 
-// Create Document Component
+// Define the ResultsType interface
+interface QuickAction {
+  text: string;
+}
+
 interface ResultsType {
   results: {
     KrishnaScore: number;
     KrishnaScoreDescription: string;
     issuesIdentified: string[];
-    quickActions: { text: string }[];
+    quickActions: QuickAction[];
   };
 }
 
@@ -71,7 +75,7 @@ export const PDFReport: React.FC<ResultsType> = ({ results }) => (
       {/* Issues Identified Section */}
       <View style={styles.section}>
         <Text style={styles.title}>Issues Identified</Text>
-        {results.issuesIdentified.map((issue: string) => (
+        {results.issuesIdentified.map((issue) => (
           <Text key={issue} style={styles.listItem}>{`- ${issue}`}</Text>
         ))}
       </View>
@@ -79,7 +83,7 @@ export const PDFReport: React.FC<ResultsType> = ({ results }) => (
       {/* Quick Actions Section */}
       <View style={styles.section}>
         <Text style={styles.title}>Actions You Can Take</Text>
-        {results.quickActions.map((action: any) => (
+        {results.quickActions.map((action) => (
           <Text key={action.text} style={styles.listItem}>{`- ${action.text}`}</Text>
         ))}
       </View>

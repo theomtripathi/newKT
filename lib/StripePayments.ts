@@ -5,14 +5,12 @@ import { getAuth } from "firebase/auth";
 import {
   addDoc,
   collection,
-  getDoc,
   getFirestore,
   onSnapshot,
   query,
   where,
 } from "firebase/firestore";
 import { getFunctions, httpsCallable } from "firebase/functions";
-import Stripe from "stripe";
 
 export const getCheckoutUrl = async (
   app: FirebaseApp,
@@ -55,9 +53,7 @@ export const getCheckoutUrl = async (
   });
 };
 
-
 export const getUserPlan = async (app: FirebaseApp) => {
-
   const productIds = {
     "prod_RQYYqLgLpr3GPh": "Basic",
     "prod_RSWVqDo9Qclym0": "Premium",
@@ -70,7 +66,7 @@ export const getUserPlan = async (app: FirebaseApp) => {
   const subscriptionsRef = collection(db, "users", userId, "subscriptions");
   const q = query(
     subscriptionsRef,
-    where("status", "in", ["trialing", "active"]) // Only check active or trialing subscriptions
+    where("status", "in", ["trialing", "active"])
   );
 
   return new Promise<{ isPremium: boolean; planName: string | null; productId: string | null }>((resolve, reject) => {
@@ -82,16 +78,12 @@ export const getUserPlan = async (app: FirebaseApp) => {
           resolve({ isPremium: false, planName: null, productId: null });
         } else {
           const activeSubscription = snapshot.docs[0].data();
-
-          // Extracting the product and plan details
           console.log("Active subscription found:", activeSubscription);
           const productId = activeSubscription.product?.id || "Unknown Product ID";
           const planName =
-            productId && productIds.hasOwnProperty(productId)
+            productId && productIds[productId as keyof typeof productIds]
               ? productIds[productId as keyof typeof productIds]
               : "Unknown Plan";
-          console.log(`User is on plan: ${planName} (Product ID: ${productId})`);
-          
           resolve({ isPremium: true, planName, productId });
         }
         unsubscribe();
@@ -104,13 +96,11 @@ export const getUserPlan = async (app: FirebaseApp) => {
   });
 };
 
-
-
 export const getPortalUrl = async (app: FirebaseApp): Promise<string> => {
   const auth = getAuth(app);
   const user = auth.currentUser;
 
-  let dataWithUrl: any;
+  let dataWithUrl: { url?: string };
   try {
     const functions = getFunctions(app, "us-central1");
     const functionRef = httpsCallable(
@@ -121,26 +111,24 @@ export const getPortalUrl = async (app: FirebaseApp): Promise<string> => {
       customerId: user?.uid,
       returnUrl: window.location.origin,
     });
-
-    // Add a type to the data
     dataWithUrl = data as { url: string };
-    console.log("Reroute to Stripe portal: ", dataWithUrl.url);
   } catch (error) {
     console.error(error);
+    throw new Error("Failed to create portal link");
   }
 
-  return new Promise<string>((resolve, reject) => {
-    if (dataWithUrl.url) {
-      resolve(dataWithUrl.url);
-    } else {
-      reject(new Error("No url returned"));
-    }
-  });
+  if (dataWithUrl.url) {
+    return dataWithUrl.url;
+  } else {
+    throw new Error("No URL returned");
+  }
 };
 
-
-
-export const onetimePayment = async (app: FirebaseApp, priceId: string,quizId: string) => {
+export const onetimePayment = async (
+  app: FirebaseApp,
+  priceId: string,
+  quizId: string
+): Promise<string> => {
   const auth = getAuth(app);
   const userId = auth.currentUser?.uid;
   if (!userId) throw new Error("User is not authenticated");
@@ -155,37 +143,12 @@ export const onetimePayment = async (app: FirebaseApp, priceId: string,quizId: s
 
   const docRef = await addDoc(checkoutSessionRef, {
     price: priceId,
-    mode: "payment", 
+    mode: "payment",
     success_url: `${window.location.origin}?quizId=${quizId}`,
     cancel_url: window.location.origin,
-    // payment_intent_data:{
-    //   metadata: { 
-    //     quizId: quizId,
-    //     userId: userId
-    //    }
-    // },
-    quizId: quizId,
-    userId: userId,
+    quizId,
+    userId,
   });
-
-  // console.log("Checkout session created with ID:", docRef.id);
-  // const sessionSnapshot = await getDoc(docRef);
-  // const { payment_intent } = sessionSnapshot.data() || {};
-
-  // console.log("sessionSnapshot:", sessionSnapshot.data());
-
-  // console.log("PaymentIntent ID:", payment_intent);
-
-  // if (payment_intent) {
-  //   const stripe = new Stripe("secret_key", { apiVersion: "2024-12-18.acacia" });
-  //   await stripe.paymentIntents.update(payment_intent, {
-  //     metadata: {
-  //       quizId: quizId,
-  //       userId: userId,
-  //     },
-  //   });
-  //   console.log("Metadata updated for PaymentIntent:", payment_intent);
-  // }
 
   return new Promise<string>((resolve, reject) => {
     const unsubscribe = onSnapshot(docRef, (snap) => {
@@ -193,9 +156,6 @@ export const onetimePayment = async (app: FirebaseApp, priceId: string,quizId: s
         error?: { message: string };
         url?: string;
       };
-
-      // const sessionData = snap.data();
-      // console.log("Updated Session Data:", sessionData);
       if (error) {
         unsubscribe();
         reject(new Error(`An error occurred: ${error.message}`));
@@ -207,52 +167,4 @@ export const onetimePayment = async (app: FirebaseApp, priceId: string,quizId: s
       }
     });
   });
-}
-
-
-
-
-// Add this code to genrate the checkout session
-// import { getCheckoutUrl } from "@/pricingplan2/StripePayments";
-// const subscribe = async () => {
-//     const app = getFirebaseApp();
-        // you can get the price id from the stripe dashboard
-//     const priceId = "price_1QUsxXSCiWlzYPouxpwGi7DL";
-
-
-//     const url = await getCheckoutUrl(app,priceId);
-//     router.push(url)
-// }
-
-
-
-
-
-
-
-
-
-
-// How to use the code in frontend
-
-// import { getCheckoutUrl, getUserPlan, onetimePayment } from "../lib/StripePayments";
-// import { app } from "../Firebase";
-// import { useRouter } from "next/navigation";
-// import { useEffect } from "react";
-
-
-// const router = useRouter();
-// const subscribebaseplan = async () => {
-//     const priceId = "price_1QXhR4SCiWlzYPouFT89JtqU";
-//     const url = await getCheckoutUrl(app,priceId);
-//     router.push(url)
-// }
-// c
-// useEffect(() => {
-//   getUserPlan(app)
-// }, [])
-
-
-// <Button onClick={subscribebaseplan} className="text-blue-800 bg-transparent font-medium text-xl">
-//               Choose Basic
-// </Button>
+};

@@ -3,7 +3,6 @@
 import {app} from "../firebase"
 import { onetimePayment } from "@/lib/StripePayments";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 export function Payment() {
   const router = useRouter();
