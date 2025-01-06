@@ -5,9 +5,10 @@ import { PDFDownloadLink } from "@react-pdf/renderer";
 import { Download } from "lucide-react";
 // import {UserQuiz} from "@/lib/types/alltypes"
 import { useState, useEffect } from "react";
+import { Suspense } from "react";
 
 
-export default function Results() {
+function Res() {
 
     const searchParams = useSearchParams() ; 
     const userquizId = searchParams.get('userquizId') ; 
@@ -55,7 +56,7 @@ useEffect(()=>{
 
     
 
-},[])
+})
 
 useEffect(()=>{
     console.log("This is the value of results", results) ; 
@@ -72,6 +73,7 @@ if(isLoading)
     return <div>....is loading </div>
 }
     return (
+      <Suspense>
         <div className="p-6 bg-gray-50 min-h-screen">
             {/* Krishna Score Section */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -94,7 +96,7 @@ if(isLoading)
             Issues Identified
           </h3>
           <ul className="list-disc list-inside text-gray-600 space-y-2">
-            {results?.issuesIdentified.map((issue) => (
+            {results?.issuesIdentified.map((issue : any) => (
               <li key={issue}>{issue}</li>
             ))}
           </ul>
@@ -104,7 +106,7 @@ if(isLoading)
             Quick Actions
           </h3>
           <ul className="list-disc list-inside text-gray-600 space-y-2">
-            {results?.quickActions.map((action) => (
+            {results?.quickActions.map((action : any) => (
               <li key={action.text} className="flex gap-2">
                 <div className="font-semibold italic">{action.type}</div>
                 <div>{action.text}</div>
@@ -128,19 +130,28 @@ if(isLoading)
 
             
         </div>
+        </Suspense>
     );
 }
 
-export default function Results() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <ResultsWithSearchParams />
+// export default function Results() {
+//   return (
+//     <Suspense fallback={<div>Loading...</div>}>
+//       <ResultsWithSearchParams />
+//     </Suspense>
+//   );
+// }
+
+export default function Results(){
+  return(
+    <Suspense>
+      <Res/>
     </Suspense>
-  );
+  )
 }
 
-function ResultsWithSearchParams() {
-  const searchParams = useSearchParams();
-  const userquizId = searchParams.get("userquizId");
-  return <ResultsContent userquizId={userquizId} />;
-}
+// function ResultsWithSearchParams() {
+//   const searchParams = useSearchParams();
+//   const userquizId = searchParams.get("userquizId");
+//   return <ResultsContent userquizId={userquizId} />;
+// }
